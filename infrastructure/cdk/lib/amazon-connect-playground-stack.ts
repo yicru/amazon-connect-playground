@@ -1,16 +1,24 @@
 import * as cdk from 'aws-cdk-lib'
+import * as connect from 'aws-cdk-lib/aws-connect'
 import { Construct } from 'constructs'
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class AmazonConnectPlaygroundStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    // The code that defines your stack goes here
+    const instance = new connect.CfnInstance(this, 'ConnectInstance', {
+      attributes: {
+        inboundCalls: true,
+        outboundCalls: true,
+      },
+      identityManagementType: 'CONNECT_MANAGED',
+      instanceAlias: 'aws-connect-playground',
+    })
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'AmazonConnectPlaygroundQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new connect.CfnPhoneNumber(this, 'ConnectPhoneNumber', {
+      countryCode: 'US',
+      targetArn: instance.attrArn,
+      type: 'DID',
+    })
   }
 }
